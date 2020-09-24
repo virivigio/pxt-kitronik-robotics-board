@@ -219,35 +219,21 @@ namespace Kitronik_Robotics_Board
     //% blockId=kitronik_I2Cled_write
     //% block="set%ledChannel|to%percentage|percent"
     //% weight=100 blockGap=8
-    //% percentage.min=0 percentage.max=180
+    //% percentage.min=0 percentage.max=65535
     export function ledChannelWrite(ledChannel: LedChannels, percentage: number): void {
         if (initalised == false) {
             secretIncantation()
         }
         let buf = pins.createBuffer(2)
-        let highByte = false
-        let deg100 = percentage * 100
-        //let pwmVal100 = deg100 * SERVO_MULTIPLIER
-        let pwmVal100 = deg100 * SERVO_MULTIPLIER
-        let pwmVal = pwmVal100 / 10000
-        pwmVal = Math.floor(pwmVal)
-        //pwmVal = pwmVal + SERVO_ZERO_OFFSET
-        pwmVal = pwmVal + 0
-        if (pwmVal > 0xFF) {
-            highByte = true
-        }
+
+        pwmVal = percentage
+
         buf[0] = ledChannel
-        buf[1] = pwmVal
+        buf[1] = pwmVal & 255
         pins.i2cWriteBuffer(chipAddress, buf, false)
-        if (highByte) {
-            buf[0] = ledChannel + 1
-            //buf[1] = 0x01
-            buf[1] = pwmVal/256
-        }
-        else {
-            buf[0] = ledChannel + 1
-            buf[1] = 0x00
-        }
+
+        buf[0] = ledChannel + 1
+        buf[1] = pwmVal >> 8
         pins.i2cWriteBuffer(chipAddress, buf, false)
     }
 
