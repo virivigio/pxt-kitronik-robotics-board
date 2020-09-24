@@ -1,0 +1,18 @@
+{
+    "target": "microbit",
+    "targetVersion": "3.0.24",
+    "name": "pxt-kitronik-robotics-board",
+    "meta": {},
+    "editor": "tsprj",
+    "pubId": "",
+    "pubCurrent": false,
+    "_rev": null,
+    "id": "20ed1394-451b-47ea-32ae-1e5d74f9fcbc",
+    "recentUse": 1600976330,
+    "modificationTime": 1600976330,
+    "blobId": null,
+    "blobVersion": null,
+    "blobCurrent": false,
+    "isDeleted": false,
+    "path": "pxt-kitronik-robotics-board"
+}
