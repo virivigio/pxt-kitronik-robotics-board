@@ -36,6 +36,22 @@ namespace Kitronik_Robotics_Board
         Servo8 = 0x24
     }
 
+    // List of led channels (1 to 6) for the led block to use. These represent register offsets in the PCA9865 driver IC.
+    export enum LedChannels {
+        //% block="Led 1 - Red"
+        Led1R = 0x08,
+        //% block="Led 1 - Green"
+        Led1G = 0x0C,
+        //% block="Led 1 - Blue"
+        Led1B = 0x10,
+        //% block="Led 2 - Red"
+        Led2R = 0x14,
+        //% block="Led 2 - Green"
+        Led2G = 0x18,
+        //% block="Led 2 - Blue"
+        Led2B = 0x1C
+    }
+
     // List of motors for the motor blocks to use. These represent register offsets in the PCA9865 driver IC.
     export enum Motors {
         //% block="Motor 1"
@@ -84,7 +100,7 @@ namespace Kitronik_Robotics_Board
     export let stepper2Steps = 200 //Default value for the majority of stepper motors; can be altered via a block if neccessary for a particular stepper motor
 
     //Trim the servo pulses. These are here for advanced users, and not exposed to blocks.
-    //It appears that servos I've tested are actually expecting 0.5 - 2.5mS pulses, 
+    //It appears that servos I've tested are actually expecting 0.5 - 2.5mS pulses,
     //not the widely reported 1-2mS 
     //that equates to multiplier of 226, and offset of 0x66
     // a better trim function that does the maths for the end user could be exposed, the basics are here 
@@ -187,6 +203,49 @@ namespace Kitronik_Robotics_Board
         }
         else {
             buf[0] = servo + 1
+            buf[1] = 0x00
+        }
+        pins.i2cWriteBuffer(chipAddress, buf, false)
+    }
+
+    /**
+     * Sets the requested led channel to the requested percentage.
+     * If the PCA has not yet been initialised calls the initialisation routine.
+     * @param ledchannel Which led channel to set
+     * @param percentage the percentage to set the servo to
+     */
+    //% group=Leds
+    //% subcategory=Leds
+    //% blockId=kitronik_I2Cled_write
+    //% block="set%ledChannel|to%percentage|percent"
+    //% weight=100 blockGap=8
+    //% percentage.min=0 percentage.max=180
+    export function ledChannelWrite(ledChannel: LedChannels, percentage: number): void {
+        if (initalised == false) {
+            secretIncantation()
+        }
+        let buf = pins.createBuffer(2)
+        let highByte = false
+        let deg100 = percentage * 100
+        //let pwmVal100 = deg100 * SERVO_MULTIPLIER
+        let pwmVal100 = deg100 * SERVO_MULTIPLIER
+        let pwmVal = pwmVal100 / 10000
+        pwmVal = Math.floor(pwmVal)
+        //pwmVal = pwmVal + SERVO_ZERO_OFFSET
+        pwmVal = pwmVal + 0
+        if (pwmVal > 0xFF) {
+            highByte = true
+        }
+        buf[0] = ledChannel
+        buf[1] = pwmVal
+        pins.i2cWriteBuffer(chipAddress, buf, false)
+        if (highByte) {
+            buf[0] = ledChannel + 1
+            //buf[1] = 0x01
+            buf[1] = pwmVal/256
+        }
+        else {
+            buf[0] = ledChannel + 1
             buf[1] = 0x00
         }
         pins.i2cWriteBuffer(chipAddress, buf, false)
