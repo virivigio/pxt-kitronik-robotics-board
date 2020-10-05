@@ -145,7 +145,7 @@ namespace Kitronik_Robotics_Board
 
         // First set the prescaler to 50 hz
         buf[0] = PRESCALE_REG
-        buf[1] = 0x85 //50Hz
+        buf[1] = 0x5A //75Hz
         pins.i2cWriteBuffer(chipAddress, buf, false)
         //Block write via the all leds register to turn off all servo and motor outputs
         buf[0] = 0xFA
@@ -217,23 +217,25 @@ namespace Kitronik_Robotics_Board
     //% group=Leds
     //% subcategory=Leds
     //% blockId=kitronik_I2Cled_write
-    //% block="set%ledChannel|to%percentage|percent"
+    //% block="set%ledChannel|to%value|"
     //% weight=100 blockGap=8
-    //% percentage.min=0 percentage.max=65535
-    export function ledChannelWrite(ledChannel: LedChannels, percentage: number): void {
+    //% value.min=0 value.max=4095
+    export function ledChannelWrite(ledChannel: LedChannels, value: number): void {
         if (initalised == false) {
             secretIncantation()
         }
         let buf = pins.createBuffer(2)
 
-        pwmVal = percentage
+       let pwmVal = value
 
         buf[0] = ledChannel
         buf[1] = pwmVal & 255
-        pins.i2cWriteBuffer(chipAddress, buf, false)
+        //buf[1] = valueLow
+	pins.i2cWriteBuffer(chipAddress, buf, false)
 
         buf[0] = ledChannel + 1
         buf[1] = pwmVal >> 8
+	//buf[1] = valueHigh
         pins.i2cWriteBuffer(chipAddress, buf, false)
     }
 
